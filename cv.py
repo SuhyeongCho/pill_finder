@@ -1,12 +1,30 @@
 import cv2
 import numpy as np
 
-image = cv2.imread('./test3.jpg')
+image = cv2.imread('./7.jpeg')
 row,col,_ = image.shape
-image = cv2.resize(image,(int(col/2),int(row/2)))
+# image = cv2.resize(image,(int(col/2),int(row/2)))
 grayimage = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-grayimage = cv2.GaussianBlur(grayimage, (3,3), 0)
-cv2.namedWindow('image')
+
+hsvimage = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+
+_,_,grayimage = cv2.split(hsvimage)
+
+cv2.imshow('v',grayimage)
+grayimage = cv2.GaussianBlur(grayimage, (5,5), 0)
+
+for i in range(row):
+    for j in range(col):
+        if grayimage[i][j] + 30 >= 255:
+            grayimage[i][j] = 255
+        else:
+            grayimage[i][j] = grayimage[i][j]+30
+
+
+cv2.imshow('v1',grayimage)
+
+
+
 
 sobelX = cv2.Sobel(grayimage, cv2.CV_64F, 1, 0)
 sobelY = cv2.Sobel(grayimage, cv2.CV_64F, 0, 1)
@@ -14,16 +32,10 @@ sobelY = cv2.Sobel(grayimage, cv2.CV_64F, 0, 1)
 sobelX = np.uint8(np.absolute(sobelX))
 sobelY = np.uint8(np.absolute(sobelY))
 add = sobelY + sobelX
-ret, thresh = cv2.threshold(add,30,255, cv2.THRESH_BINARY)
-ret, thresh2 = cv2.threshold(add,100,255, cv2.THRESH_BINARY)
+mul = sobelY * sobelX
 
-
-cv2.imshow("Sobel X", sobelX)
-cv2.imshow("Sobel Y", sobelY)
-cv2.imshow("Sobel add", add)
-cv2.imshow("Sobel thresh", thresh)
-cv2.imshow("Sobel thresh2", thresh2)
-cv2.imshow("Sobel min", thresh - thresh2)
+cv2.imshow('add',add)
+cv2.imshow('mul',mul)
 
 
 
@@ -31,25 +43,32 @@ cv2.imshow("Sobel min", thresh - thresh2)
 
 
 
-# def nothing(x):
-#     pass
 
-# # create trackbars for color change
-# cv2.createTrackbar('threshold1', 'image', 0, 255, nothing)
-# cv2.createTrackbar('threshold2', 'image', 0, 255, nothing)
+# image = cv2.imread('5.jpeg')
+# # row,col,_ = image.shape
+# # image = cv2.resize(image,(int(col/2),int(row/2)))
 
-# while True:
-#     threshold1 = cv2.getTrackbarPos('threshold1', 'image')
-#     threshold2 = cv2.getTrackbarPos('threshold2', 'image')
+# lab = cv2.cvtColor(image,cv2.COLOR_BGR2LAB)
+# cv2.imshow('lab',image)
 
-#     edges = cv2.Canny(mul, threshold1, threshold2)
-#     cv2.imshow('gray',grayimage)
-#     cv2.imshow('image', edges)
-#     k = cv2.waitKey(1) & 0xFF
-#     if k == 27:
-#         break
+# lab = cv2.GaussianBlur(lab, (3,3), 0)
+# lab = cv2.GaussianBlur(lab, (3,3), 0)
 
-# cv2.destroyAllWindows()
+
+
+# edge = cv2.Canny(lab,100,200)
+
+# cv2.imshow('egge',edge)
+
+# th = cv2.adaptiveThreshold(edge,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,15,2)
+
+# cv2.imshow('th',th)
+
+
+
+
+
+
 
 
 
