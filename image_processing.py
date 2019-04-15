@@ -11,6 +11,46 @@ def backproject(source, target, levels = 2, scale = 1):
         cv2.normalize(roihist,roihist,0,255,cv2.NORM_MINMAX)
         dst = cv2.calcBackProject([hsvt],[0,1],roihist,[0,180,0,256], scale)
         return dst
+# def fill(imgx,imglast,threshMap,img_size):
+#     row,col = img_size
+#     kernel = np.ones((3,3),np.uint8)
+#     threshMap1 = cv2.morphologyEx(threshMap, cv2.MORPH_CLOSE, kernel)
+
+
+#     for i1 in range(row):
+#         if threshMap1[i1][(int)(col/2)] > 20 :
+#             break
+#     for j1 in range(col):
+#         if threshMap1[(int)(row/2)][j1] > 20 :
+#             break
+#     size=5
+#     while (size < 20):
+#         break
+#         kernel = np.ones((size,size),np.uint8)
+#         threshMap2 = cv2.morphologyEx(threshMap, cv2.MORPH_CLOSE, kernel)
+
+#         size+=2
+#         for i2 in range(row):
+#             if threshMap2[i2][(int)(col/2)] > 20 :
+#                 break
+#         for j2 in range(col):
+#             if threshMap2[(int)(row/2)][j2] > 20 :
+#                 break
+#         if i1 != i2 or j1 != j2:
+#             break
+#         else:
+#             threshMap1 = threshMap2
+#             i1 = i2
+#             j1 = j2
+    
+#     threshMap = threshMap1
+#     threshMap = cv2.blur(threshMap, (3,3))
+#     for i in range(row):
+#         for j in range(col):
+#             if (threshMap[i][j]==0) :
+#                 imgx[i][j]=0
+#                 imglast[i][j]=0
+#     return imglast,threshMap
 
 def fill(imgx,imglast,threshMap,img_size):
     kernel = np.ones((19,19),np.uint8)
@@ -28,7 +68,7 @@ def fill(imgx,imglast,threshMap,img_size):
 def image_processing(img):
 
     # 약 설정
-    imgx = img[0:370,:]
+    imgx = img[:370,:]
     imglast = imgx.copy()
     cv2.pyrMeanShiftFiltering(imgx, 2, 10, imgx, 4)
 
@@ -94,6 +134,12 @@ def image_processing(img):
 
 
     x,y,w,h = cv2.boundingRect(contours[-1])
+    if(h>w):
+        x = x-(int)((h-w)/2)
+        w=h
+    else:
+        y = y-(int)((w-h)/2)
+        h=w
     aaa = threshMap[y:y+h,x:x+w]
     bbb = imglast[y:y+h,x:x+w]
 
