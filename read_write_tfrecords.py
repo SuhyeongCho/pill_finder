@@ -7,9 +7,9 @@ def write_tfrecords(directory,tfrecords_name,label):
     label_list = []
 
     size = 96
-    n_pic = 99
+    n_pic = 9999
     for i in range(1,n_pic+1):
-        name = directory + str(i) + '.jpg'
+        name = directory +'_'+ str(i) + '.jpg'
         image_list.append(name)
         label_list.append(label)
 
@@ -17,19 +17,21 @@ def write_tfrecords(directory,tfrecords_name,label):
     writer = tf.python_io.TFRecordWriter('./tfrecords/'+tfrecords_name)
 
     for image_name,label in zip(image_list,label_list):
+        try:
+            image = cv2.imread(image_name,cv2.IMREAD_GRAYSCALE)
+            image = cv2.resize(image,(size,size))
 
-        image = cv2.imread(image_name,cv2.IMREAD_GRAYSCALE)
-        image = cv2.resize(image,(size,size))
+            _image = image.tostring()
 
-        _image = image.tostring()
+            example = tf.train.Example(features=tf.train.Features(feature={
+                'image' : tf.train.Feature(bytes_list = tf.train.BytesList(value = [_image])),
+                'label' : tf.train.Feature(int64_list = tf.train.Int64List(value = [label]))
+            }))
 
-
-        example = tf.train.Example(features=tf.train.Features(feature={
-            'image' : tf.train.Feature(bytes_list = tf.train.BytesList(value = [_image])),
-            'label' : tf.train.Feature(int64_list = tf.train.Int64List(value = [label]))
-        }))
-
-        writer.write(example.SerializeToString())
+            writer.write(example.SerializeToString())
+            print(image_name,"finished")
+        except:
+            continue
 
     writer.close()
 
@@ -51,3 +53,10 @@ def read_tfrecords(tfrecords_name):
     dataset = dataset.map(_parse_function)
 
     return dataset
+
+
+shape_name = ['shape_01','shape_02','shape_04','shape_05','shape_06','shape_08','shape_09','shape_10']
+
+for label in range(len(shape_name)):
+    directory = './pic/' + shape_name[label] +'/'
+    write_tfrecords(directory,shape_name[label]+'.tfrecords',label)

@@ -1,38 +1,36 @@
 import cv2
+import os
 from image_processing import *
-from convex import *
 
-directory = './crawling'
-for i in range(1,201):
-    filename = str(i)+'.jpg'
-    filepath = directory +'/'+filename
+directory = './crawling/shape_10'
+extension = '.jpg'
+for i in range(1,10000):
+    file_index = directory + '/_' + str(i)
+    file_path = file_index + extension
     try:
-        img = cv2.imread(filepath,cv2.IMREAD_COLOR)
+        img = cv2.imread(file_path,cv2.IMREAD_COLOR)
         row,col,_ = img.shape
+        # 반반 나누기
         img_l = img[:,:390]
         img_r = img[:,390:]
-
-        img = image_processing(img_l)
-        print(filepath,"left is processed")
-        cv2.imshow(filename+"left",img)
-        k = cv2.waitKey(0)
-        if k == 27:
-            break
-
     except:
-        print("Error Occcured! at",filepath,"left")
-        continue
+        break
     try:
-        img = image_processing(img_r)
-        print(filepath,"right is processed")
-        cv2.imshow(filename+"right",img)
-        k = cv2.waitKey(0)
-        if k == 27:
-            break
+        _,img = image_processing(img_l)
+        img = cv2.resize(img,(96,96))
+        print(file_path,"left is processed")
+        cv2.imwrite(file_index + '_l' + extension,img)
+    except:
+        print("Error Occcured! at",file_path,"left")
+    try:
+        _,img = image_processing(img_r)
+        img = cv2.resize(img,(96,96))
+        print(file_path,"right is processed")
+        cv2.imwrite(file_index + '_r' + extension,img)
 
     except:
-        print("Error Occcured! at",filepath,"right")
-        continue
+        print("Error Occcured! at",file_path,"right")
 
+    os.remove(file_path)
     
     
