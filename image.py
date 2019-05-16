@@ -2,7 +2,7 @@ import cv2
 import os
 from image_processing import *
 
-directory = './crawling/shape_10'
+directory = './crawling/shape_01'
 extension = '.jpg'
 for i in range(1,10000):
     file_index = directory + '/_' + str(i)
@@ -16,21 +16,21 @@ for i in range(1,10000):
     except:
         break
     try:
-        _,img = image_processing(img_l)
-        img = cv2.resize(img,(96,96))
+        imgcolorc,imgcolors,_,_ = image_processing(img_l)
+        # img = cv2.resize(img,(96,96))
         print(file_path,"left is processed")
         cv2.imwrite(file_index + '_l' + extension,img)
     except:
         print("Error Occcured! at",file_path,"left")
     try:
-        _,img = image_processing(img_r)
-        img = cv2.resize(img,(96,96))
+        imgcolorc,imgcolors,_,_ = image_processing(img_r)
+        # img = cv2.resize(img,(96,96))
         print(file_path,"right is processed")
         cv2.imwrite(file_index + '_r' + extension,img)
 
     except:
         print("Error Occcured! at",file_path,"right")
 
-    os.remove(file_path)
+    # os.remove(file_path)
     
     

@@ -18,6 +18,7 @@ def fill(imgx,imglast,threshMap,img_size):
     threshMap1 = cv2.morphologyEx(threshMap, cv2.MORPH_CLOSE, kernel)
 
 
+
     for i1 in range(row):
         if threshMap1[i1][(int)(col/2)] > 20 :
             break
@@ -26,6 +27,7 @@ def fill(imgx,imglast,threshMap,img_size):
             break
     size=5
     while (size < 20):
+        
         kernel = np.ones((size,size),np.uint8)
         threshMap2 = cv2.morphologyEx(threshMap, cv2.MORPH_CLOSE, kernel)
 
@@ -58,6 +60,35 @@ def fill(imgx,imglast,threshMap,img_size):
                 imglast2[i][j]=0
     return imglast,imglast2,threshMap, threshMapfilter
 
+
+    
+
+
+
+
+
+
+def rgb2hsv(r, g, b):
+    r, g, b = r/255.0, g/255.0, b/255.0
+    mx = max(r, g, b)
+    mn = min(r, g, b)
+    df = mx-mn
+    if abs(mx - mn)<0.04:
+        h = 0
+    elif mx == r:
+        h = (60 * ((g-b)/df) + 360) % 360
+    elif mx == g:
+        h = (60 * ((b-r)/df) + 120) % 360
+    elif mx == b:
+        h = (60 * ((r-g)/df) + 240) % 360
+    if mx == 0:
+        s = 0
+    else:
+        s = df/mx
+    v = mx
+    return h, s, v*100
+
+
 def color(bbb):
     b,g,r = cv2.split(bbb)
     cb=0
@@ -75,17 +106,37 @@ def color(bbb):
     cb = (int)(cb/cnt)
     cg = (int)(cg/cnt)
     cr = (int)(cr/cnt)
-    for i in range(h):
-        for j in range(w):
-            if (b[i][j] < 20):
-                b[i][j] = cb
-            if (g[i][j] < 20):
-                g[i][j] = cg
-            if (r[i][j] < 20):
-                r[i][j] = cr
-            
+#     for i in range(h):
+#         for j in range(w):
+#             if (b[i][j] < 20):
+#                 b[i][j] = cb
+#             if (g[i][j] < 20):
+#                 g[i][j] = cg
+#             if (r[i][j] < 20):
+#                 r[i][j] = cr
+
+    h,_,v = rgb2hsv(cr,cg,cb)
+    #검은색, 회색, 흰색 해야됨
+    if abs(cb-cg)+abs(cg-cr)+abs(cr-cb)<50 :
+        if v<30:
+            color1 = 'black'
+        elif v<70:
+            color1 = 'gray'
+        else:
+            color1 = 'white'
+    else:
+        if h<=60 or h>330 :
+            color1 = 'red'
+        elif h<=180 :
+            color1 = 'green'
+        elif h<=225 :
+            color1 = 'blue'
+        elif h<=330:
+            color1 = 'purple'
+
+
     bbb = cv2.merge([b,g,r])        
-    return bbb
+    return bbb,color1
 
 
 
@@ -96,17 +147,27 @@ def image_processing(img):
     imgx = img[0:370,:]
     imglast = imgx.copy()
     cv2.pyrMeanShiftFiltering(imgx, 2, 10, imgx, 4)
-
+    
+#     cv2.imshow("filtering",imgx)
+#     cv2.imwrite("C:/Download/1.jpg", imgx)
 
 
     backproj = np.uint8(backproject(imgx, imgx, levels = 2))
     backproj = 255 - backproj
+    
+#     cv2.imshow("back",backproj)
+    cv2.imwrite("C:/Download/2.jpg", backproj)
 
+    
     cv2.normalize(backproj,backproj,0,255,cv2.NORM_MINMAX)
 
+#     cv2.imshow("nomalize",backproj)
+#     cv2.imwrite("C:/Download/3.jpg", backproj)
+
+    
     saliencies = [backproj, backproj, backproj]
     saliency = cv2.merge(saliencies)
-
+    
 
     cv2.pyrMeanShiftFiltering(saliency, 20, 200, saliency, 2)
     saliency = cv2.cvtColor(saliency, cv2.COLOR_BGR2GRAY)
@@ -114,8 +175,14 @@ def image_processing(img):
 
     saliencyMap = saliency
 
+#     cv2.imshow("saliency",saliencyMap)
+#     cv2.imwrite("C:/Download/4.jpg", saliencyMap)
+
+    
     threshMap = cv2.threshold(saliencyMap.astype("uint8"), 0, 255,cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
 
+#     cv2.imshow("thres",threshMap)
+#     cv2.imwrite("C:/Download/5.jpg", threshMap)
 
     #hsv로 변환후 v가 0.5이하면 그림자로 취급 검은색으로 만듬
     hsv = cv2.cvtColor(imgx, cv2.COLOR_BGR2HSV)
@@ -146,32 +213,45 @@ def image_processing(img):
             x = (v[i][j]-min)/((max-min)+1e-10)
             if(x<=0.3) :
                 threshMap[i][j] = 0
-
-
+    
+#     cv2.imshow("shadow",threshMap)
+#     cv2.imwrite("C:/Download/6.jpg", threshMap)
+    
     #가운데 기준으로 흰색 경계부분 검출
 
 
     imglast,imglast2,threshMap, threshMapfilter = fill(imgx,imglast,threshMap,(row,col))
 
-
+#     cv2.imshow("fill",threshMap)
+#     cv2.imwrite("C:/Download/7.jpg", threshMap)
+    
     contours, hierarchy = cv2.findContours(threshMap * 1,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 
     contours = sorted(contours, key = cv2.contourArea)
 
     x,y,w,h = cv2.boundingRect(contours[-1])
-    if(h>w):
-        x = x-(int)((h-w)/2)
-        w=h
-    else:
-        y = y-(int)((w-h)/2)
-        h=w
+#     if(h>w):
+#         x = x-(int)((h-w)/2)
+#         w=h
+#     else:
+#         y = y-(int)((w-h)/2)
+#         h=w
         
 
-    imgcolor = imglast[y:y+h,x:x+w]
+    imgcolorc = imglast[y:y+h,x:x+w]
+    
+    imgtemp = threshMapfilter.copy()
+    imgcolors = imgtemp[y:y+h,x:x+w]
+    
     contours, hierarchy = cv2.findContours(threshMapfilter * 1,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 
     contours = sorted(contours, key = cv2.contourArea)
+#    imglast,threshMap = fill(imgx,imglast,threshMap,(row,col))
 
+    
+    
+
+#------------------------------크기 정사각형 만드는 부분------------------------------------------
     x,y,w,h = cv2.boundingRect(contours[-1])
     if(h>w):
         x = x-(int)((h-w)/2)
@@ -179,12 +259,16 @@ def image_processing(img):
     else:
         y = y-(int)((w-h)/2)
         h=w
+#------------------------------------------------------------------------------
         
     imgshape = threshMapfilter[y:y+h,x:x+w]
 
     
-    imgcolor = color(imgcolor)
-
+    imgcolorc,colorname = color(imgcolorc)
     
-    return imgcolor,imgshape
-
+    # imgcolorc : 진구가 필요한 색파일
+    # imgcolors : 진구가 필요한 모양파일
+    # imgshape : 수형이가 필요한 모양(정사각형)
+    # colorname : 색깔
+    
+    return imgcolorc,imgcolors,imgshape,colorname
