@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import cv2
 import numpy as np
 
@@ -11,6 +13,53 @@ def backproject(source, target, levels = 2, scale = 1):
         cv2.normalize(roihist,roihist,0,255,cv2.NORM_MINMAX)
         dst = cv2.calcBackProject([hsvt],[0,1],roihist,[0,180,0,256], scale)
         return dst
+
+    
+    
+def text(img):
+    imgx = img
+   
+    imglast = imgx.copy()
+    
+    
+    row=0
+    col=0
+    row,col,_=imgx.shape    
+
+    cntb=0
+    cntf=0
+    
+#   kernel size 3으로 설정
+
+    kernel = np.ones((3,3),np.uint8)
+    imgx1 = cv2.morphologyEx(imgx, cv2.MORPH_CLOSE, kernel)
+    
+#   kernel size 증가하면서 전체 크기 변할시 그 전 값 리턴 
+
+    for ksize in range(3,row,2):
+        kernel = np.ones((ksize,ksize),np.uint8)
+        imgx2 = cv2.morphologyEx(imgx, cv2.MORPH_CLOSE, kernel)
+#        cv2.imshow("fill"+str(ksize),imgx2)
+#        cv2.imwrite("C:/Download/"+str(ksize)+"8.jpg", imgx2)
+        
+        b,g,r = cv2.split(imgx2)
+
+        for i in range(int(row/2)):
+            for j in range(int(col/2)):
+                if b[i][j]+g[i][j]+r[i][j]>30:
+                    cntf+=1
+        if cntb is 0:
+            cntb = cntf
+        elif cntf - cntb > int(cntb*0.02):
+            break
+        imgx1 = imgx2
+        cntf=0
+
+    
+    return imgx1
+
+
+    
 
 def fill(imgx,imglast,threshMap,img_size):
     row,col = img_size
@@ -148,21 +197,16 @@ def image_processing(img):
     imglast = imgx.copy()
     cv2.pyrMeanShiftFiltering(imgx, 2, 10, imgx, 4)
     
-#     cv2.imshow("filtering",imgx)
-#     cv2.imwrite("C:/Download/1.jpg", imgx)
-
 
     backproj = np.uint8(backproject(imgx, imgx, levels = 2))
     backproj = 255 - backproj
     
-#     cv2.imshow("back",backproj)
+
     cv2.imwrite("C:/Download/2.jpg", backproj)
 
     
     cv2.normalize(backproj,backproj,0,255,cv2.NORM_MINMAX)
 
-#     cv2.imshow("nomalize",backproj)
-#     cv2.imwrite("C:/Download/3.jpg", backproj)
 
     
     saliencies = [backproj, backproj, backproj]
@@ -175,14 +219,11 @@ def image_processing(img):
 
     saliencyMap = saliency
 
-#     cv2.imshow("saliency",saliencyMap)
-#     cv2.imwrite("C:/Download/4.jpg", saliencyMap)
 
     
     threshMap = cv2.threshold(saliencyMap.astype("uint8"), 0, 255,cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
 
-#     cv2.imshow("thres",threshMap)
-#     cv2.imwrite("C:/Download/5.jpg", threshMap)
+
 
     #hsv로 변환후 v가 0.5이하면 그림자로 취급 검은색으로 만듬
     hsv = cv2.cvtColor(imgx, cv2.COLOR_BGR2HSV)
@@ -214,42 +255,27 @@ def image_processing(img):
             if(x<=0.3) :
                 threshMap[i][j] = 0
     
-#     cv2.imshow("shadow",threshMap)
-#     cv2.imwrite("C:/Download/6.jpg", threshMap)
+
     
-    #가운데 기준으로 흰색 경계부분 검출
+    #fill로 채우고 경계부분 검출
 
 
     imglast,imglast2,threshMap, threshMapfilter = fill(imgx,imglast,threshMap,(row,col))
 
-#     cv2.imshow("fill",threshMap)
-#     cv2.imwrite("C:/Download/7.jpg", threshMap)
     
-    contours, hierarchy = cv2.findContours(threshMap * 1,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+    _,contours, hierarchy = cv2.findContours(threshMap * 1,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 
     contours = sorted(contours, key = cv2.contourArea)
 
     x,y,w,h = cv2.boundingRect(contours[-1])
-#     if(h>w):
-#         x = x-(int)((h-w)/2)
-#         w=h
-#     else:
-#         y = y-(int)((w-h)/2)
-#         h=w
-        
 
     imgcolorc = imglast[y:y+h,x:x+w]
     
-    imgtemp = threshMapfilter.copy()
-    imgcolors = imgtemp[y:y+h,x:x+w]
     
-    contours, hierarchy = cv2.findContours(threshMapfilter * 1,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+    
+    _,contours, hierarchy = cv2.findContours(threshMapfilter * 1,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 
     contours = sorted(contours, key = cv2.contourArea)
-#    imglast,threshMap = fill(imgx,imglast,threshMap,(row,col))
-
-    
-    
 
 #------------------------------크기 정사각형 만드는 부분------------------------------------------
     x,y,w,h = cv2.boundingRect(contours[-1])
@@ -265,10 +291,12 @@ def image_processing(img):
 
     
     imgcolorc,colorname = color(imgcolorc)
+    imgcolorf = text(imgcolorc)
     
-    # imgcolorc : 진구가 필요한 색파일
-    # imgcolors : 진구가 필요한 모양파일
-    # imgshape : 수형이가 필요한 모양(정사각형)
+    # imgcolorc : 진구가 필요한 원본 파일
+    # imgcolorf : 진구가 필요한 fill 파일
+    # imgshape : 수형이가 필요한 모양 파일
     # colorname : 색깔
-    
-    return imgcolorc,imgcolors,imgshape,colorname
+
+
+    return imgcolorc,imgcolorf,imgshape,colorname
