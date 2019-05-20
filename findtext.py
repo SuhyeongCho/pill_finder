@@ -3,11 +3,11 @@
 import numpy as np
 import cv2
 
-def findtext(imgcolorc,imgcolors):
+def findtext(imgcolorc,imgcolorf):
     img = imgcolorc
-    img2 = imgcolors
+    img2 = imgcolorf
     row,col,_ = img.shape
-    row2,col2 = img2.shape
+    row2,col2,_ = img2.shape
     distrow = (int)(row*0.1)
     distcol = (int)(col*0.1)
     distrow2 = (int)(row2*0.1)
@@ -16,7 +16,7 @@ def findtext(imgcolorc,imgcolors):
     img2 = img2[0+distrow2:row2-distrow2,0+distcol2:col2-distcol2]
 
     grayimage = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-    grayimage2 = img2#cv2.cvtColor(img2,cv2.COLOR_BGR2GRAY)
+    grayimage2 = cv2.cvtColor(img2,cv2.COLOR_BGR2GRAY)
 
     sobelX = cv2.Sobel(grayimage,cv2.CV_64F,1,0)
     sobelY = cv2.Sobel(grayimage,cv2.CV_64F,0,1)
@@ -63,7 +63,10 @@ def findtext(imgcolorc,imgcolors):
         x,y,w,h = cv2.boundingRect(cnt)
         if w*h>= max :
             max = w*h
-    arr=[]
+    textarr=[]
+    origarr=[]
+    grayarr=[]
+    xarr=[]
     count=0
     for i in range(0,len(contours)):
         cnt = contours[i]
@@ -71,5 +74,25 @@ def findtext(imgcolorc,imgcolors):
         if w*h<(int)(max*0.3):
             continue
         tmp = th[y:y+h,x:x+w]
-        arr.append(tmp.copy())
-    return arr
+        textarr.append(tmp.copy())
+        tmp = img[y:y+h,x:x+w]
+        tmp = cv2.cvtColor(tmp,cv2.COLOR_BGR2GRAY)
+        origarr.append(tmp.copy())
+        # xarr.append(x)
+    
+    # xlength = len(xarr)
+    # for i in range(0,xlength):
+    #     for j in range(0,xlength):
+    #         if xarr[i]>xarr[j]:
+    #             tmp = xarr[i]
+    #             xarr[i] = xarr[j]
+    #             xarr[j] = tmp
+                
+    #             tmp = origarr[i].copy()
+    #             origarr[i]=origarr[j].copy()
+    #             origarr[j]=tmp.copy()
+                
+    #             tmp = textarr[i].copy()
+    #             textarr[i]=textarr[j].copy()
+    #             textarr[j]=tmp.copy()
+    return origarr,textarr

@@ -50,7 +50,7 @@ def text(img):
                     cntf+=1
         if cntb is 0:
             cntb = cntf
-        elif cntf - cntb > int(cntb*0.02):
+        elif cntf - cntb > round(cntb*0.05):
             break
         imgx1 = imgx2
         cntf=0
@@ -263,7 +263,7 @@ def image_processing(img):
     imglast,imglast2,threshMap, threshMapfilter = fill(imgx,imglast,threshMap,(row,col))
 
     
-    _,contours, hierarchy = cv2.findContours(threshMap * 1,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(threshMap * 1,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 
     contours = sorted(contours, key = cv2.contourArea)
 
@@ -273,7 +273,7 @@ def image_processing(img):
     
     
     
-    _,contours, hierarchy = cv2.findContours(threshMapfilter * 1,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(threshMapfilter * 1,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 
     contours = sorted(contours, key = cv2.contourArea)
 

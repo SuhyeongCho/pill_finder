@@ -24,9 +24,11 @@ for i in range(1,10000):
         imgcolorc,imgcolorf,_,_ = image_processing(img_l)
         # img = cv2.resize(img,(96,96))
         print(file_path,"left is processed")
-        arr = findtext(imgcolorc,imgcolorf)
-        for happy in arr:
-            cv2.imshow('a',happy)
+        origarr, textarr = findtext(imgcolorc,imgcolorf)
+        for happy1,happy2 in zip(origarr,textarr):
+            cv2.imshow('happy1',happy1)
+            cv2.imshow('happy2',happy2)
+
             cv2.waitKey(0)
         # cv2.imwrite(file_index + '_l' + extension,img)
     except:
@@ -36,9 +38,11 @@ for i in range(1,10000):
         imgcolorc,imgcolorf,_,_ = image_processing(img_r)
         # img = cv2.resize(img,(96,96))
         print(file_path,"right is processed")
-        arr = findtext(imgcolorc,imgcolorf)
-        for happy in arr:
-            cv2.imshow('b',happy)
+        origarr, textarr = findtext(imgcolorc,imgcolorf)
+        for happy1,happy2 in zip(origarr,textarr):
+            cv2.imshow('happy4',happy1)
+            cv2.imshow('happy5',happy2)
+
             cv2.waitKey(0)
 
         # cv2.imwrite(file_index + '_r' + extension,img)
