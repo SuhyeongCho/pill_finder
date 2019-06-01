@@ -57,25 +57,15 @@ optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     sess.run(iterator.initializer)
-    for epoch in range(500):
+    saver = tf.train.Saver()
+
+    for i in range(50000):
         image_batch,label_batch = sess.run(next_element)
         label_batch = tf.one_hot(label_batch,depth=8).eval(session=sess)
         label_batch = np.asarray(label_batch, dtype=np.float32)
         sess.run(optimizer,feed_dict={X:image_batch,Y:label_batch,keep_prob:0.8})
-        if (epoch+1) % 1 == 0:
+        if (i+1) % 100 == 0:
             co = sess.run(cost,feed_dict={X:image_batch,Y:label_batch,keep_prob:1.0})
-            print("{0} : {1}".format(epoch+1,co))
-    saver = tf.train.Saver()
-    save_path = saver.save(sess,'saver/saver.ckpt')
+            print("{0} : {1}".format(i+1,co))
+            saver.save(sess,'saver/shape',global_step=i+1)
 
-
-# with tf.Session() as sess:
-#     saver = tf.train.Saver()
-#     saver.restore(sess,'saver/saver.ckpt')
-#     image = cv2.imread('./4.jpeg',cv2.IMREAD_GRAYSCALE)
-#     image = cv2.resize(image,(size,size))
-#     cv2.imshow('test',image)
-#     image = np.reshape(image,[-1,size,size,1])
-#     pred = sess.run(logits,feed_dict={X:image,keep_prob:1.0})
-#     print(np.argmax(pred[0]))
-#     cv2.waitKey(0)
