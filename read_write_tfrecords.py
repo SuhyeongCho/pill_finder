@@ -7,9 +7,9 @@ def write_tfrecords(directory,tfrecords_name,label):
     label_list = []
 
     size = 96
-    n_pic = 9999
+    n_pic = 64911
     for i in range(1,n_pic+1):
-        name = directory +'_'+ str(i) + '.jpg'
+        name = directory + str(i) + '.jpg'
         image_list.append(name)
         label_list.append(label)
 
@@ -56,7 +56,8 @@ def read_tfrecords(tfrecords_name):
 
 
 shape_name = ['shape_01','shape_02','shape_04','shape_05','shape_06','shape_08','shape_09','shape_10']
+char_name = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','default']
 
-for label in range(len(shape_name)):
-    directory = './pic/' + shape_name[label] +'/'
-    write_tfrecords(directory,shape_name[label]+'.tfrecords',label)
+for label in range(len(char_name)):
+    directory = './char' + char_name[label] +'/'
+    write_tfrecords(directory,'char_'+char_name[label]+'.tfrecords',label)
