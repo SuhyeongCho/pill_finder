@@ -83,7 +83,7 @@ def findtext(imgcolorc,imgcolorf):
     xlength = len(xarr)
     for i in range(0,xlength):
         for j in range(0,xlength):
-            if xarr[i]>xarr[j]:
+            if xarr[i]<xarr[j]:
                 tmp = xarr[i]
                 xarr[i] = xarr[j]
                 xarr[j] = tmp
