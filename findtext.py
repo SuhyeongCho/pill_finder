@@ -78,21 +78,21 @@ def findtext(imgcolorc,imgcolorf):
         tmp = img[y:y+h,x:x+w]
         tmp = cv2.cvtColor(tmp,cv2.COLOR_BGR2GRAY)
         origarr.append(tmp.copy())
-        # xarr.append(x)
+        xarr.append(x)
     
-    # xlength = len(xarr)
-    # for i in range(0,xlength):
-    #     for j in range(0,xlength):
-    #         if xarr[i]>xarr[j]:
-    #             tmp = xarr[i]
-    #             xarr[i] = xarr[j]
-    #             xarr[j] = tmp
+    xlength = len(xarr)
+    for i in range(0,xlength):
+        for j in range(0,xlength):
+            if xarr[i]>xarr[j]:
+                tmp = xarr[i]
+                xarr[i] = xarr[j]
+                xarr[j] = tmp
                 
-    #             tmp = origarr[i].copy()
-    #             origarr[i]=origarr[j].copy()
-    #             origarr[j]=tmp.copy()
+                tmp = origarr[i].copy()
+                origarr[i]=origarr[j].copy()
+                origarr[j]=tmp.copy()
                 
-    #             tmp = textarr[i].copy()
-    #             textarr[i]=textarr[j].copy()
-    #             textarr[j]=tmp.copy()
+                tmp = textarr[i].copy()
+                textarr[i]=textarr[j].copy()
+                textarr[j]=tmp.copy()
     return origarr,textarr

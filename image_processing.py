@@ -193,7 +193,7 @@ def color(bbb):
 def image_processing(img):
 
     # 약 설정
-    imgx = img[0:370,:]
+    imgx = img#[0:370,:]
     imglast = imgx.copy()
     cv2.pyrMeanShiftFiltering(imgx, 2, 10, imgx, 4)
     

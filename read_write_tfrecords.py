@@ -6,7 +6,7 @@ def write_tfrecords(directory,tfrecords_name,label):
     image_list = []
     label_list = []
 
-    size = 96
+    # size = 48
     n_pic = 64911
     for i in range(1,n_pic+1):
         name = directory + str(i) + '.jpg'
@@ -19,7 +19,7 @@ def write_tfrecords(directory,tfrecords_name,label):
     for image_name,label in zip(image_list,label_list):
         try:
             image = cv2.imread(image_name,cv2.IMREAD_GRAYSCALE)
-            image = cv2.resize(image,(size,size))
+            # image = cv2.resize(image,(size,size))
 
             _image = image.tostring()
 
@@ -36,7 +36,7 @@ def write_tfrecords(directory,tfrecords_name,label):
     writer.close()
 
 def _parse_function(example_proto):
-    size = 96
+    size = 48
 
     features = {'image': tf.FixedLenFeature([], tf.string, default_value=""),
               'label': tf.FixedLenFeature([], tf.int64, default_value=0)}
@@ -55,9 +55,9 @@ def read_tfrecords(tfrecords_name):
     return dataset
 
 
-shape_name = ['shape_01','shape_02','shape_04','shape_05','shape_06','shape_08','shape_09','shape_10']
-char_name = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','default']
+# shape_name = ['shape_01','shape_02','shape_04','shape_05','shape_06','shape_08','shape_09','shape_10']
+# char_name = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','default']
 
-for label in range(len(char_name)):
-    directory = './char' + char_name[label] +'/'
-    write_tfrecords(directory,'char_'+char_name[label]+'.tfrecords',label)
+# for label in range(len(char_name)):
+#     directory = './char/' + char_name[label] +'/'
+#     write_tfrecords(directory,'char_'+char_name[label]+'.tfrecords',label)
