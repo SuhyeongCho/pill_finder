@@ -8,6 +8,8 @@ from findtext import findtext
 def char_decoding(c):
     if c < 10:
         return str(chr(c+48))
+    elif c == 36:
+        return ""
     else:
         return str(chr(c - 10 + 65))
 
@@ -29,18 +31,22 @@ def shape_decoding(s):
     elif s== 7:
         return "팔각형"
 
-image = cv2.imread('test1.jpeg')
+image = cv2.imread('test7.png')
 imgcolorc,imgcolorf,imgshape,colorname = image_processing(image)
 _,thres = findtext(imgcolorc,imgcolorf)
 
 print("char : ",end="")
 for th in thres:
+    cv2.imshow("th",th)
+    cv2.waitKey(0)
     th_sq = make_square(th)
     c = char_test(th_sq)[0]
     print(char_decoding(c),end="")
 print()
 
 s = shape_test(imgshape)[0]
+cv2.imshow("a",imgshape)
+cv2.waitKey(0)
 print("shape :",shape_decoding(s))
 
 print("color :",colorname)

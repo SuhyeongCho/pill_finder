@@ -45,7 +45,7 @@ def findtext(imgcolorc,imgcolorf):
             sum = sum + grayimage[i][j]
 
     sum = (int)(sum/(row*col))
-    sum = sum+(int)(sum*0.2)
+    sum = sum+(int)(sum*0.4)
 
     grayimage = cv2.GaussianBlur(grayimage,(9,9),0)
     _,th = cv2.threshold(grayimage,sum,255,0)
